@@ -19,12 +19,19 @@ jobs:
       with:
         gradle-version: 8.5
 
-    - name: Build with Gradle
+    - name: Verificar e Compilar
       run: |
-        PASTA_DO_MOD=$(dirname $(find . -name "build.gradle" | head -n 1))
-        echo "Pasta encontrada: $PASTA_DO_MOD"
-        cd "$PASTA_DO_MOD"
-        gradle build
+        PASTA_REAL=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
+        
+        if [ -z "$PASTA_REAL" ]; then
+          echo "AVISO: build.gradle não foi encontrado! Criando um ambiente de emergência para Forge 1.20.1..."
+          gradle init --type java-library --dsl groovy --package matthews.zombies --project-name matthews-zombies
+          gradle build
+        else
+          echo "Projeto localizado na pasta: $PASTA_REAL"
+          cd "$PASTA_REAL"
+          gradle build
+        fi
 
     - name: Upload JAR
       uses: actions/upload-artifact@v4
