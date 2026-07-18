@@ -32,7 +32,11 @@ jobs:
         PASTA_REAL=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
         cd "$PASTA_REAL"
         
-        # 1. Reescrevendo o ModFuelHandler totalmente limpo e correto
+        # Deleta as versões corrompidas antigas para evitar que o lixo se misture
+        rm -f src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java
+        rm -f src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java
+        
+        # 1. Cria a versão limpa do ModFuelHandler
         mkdir -p src/main/java/com/apocalipse/zombieapoc/registry
         cat << 'EOF' > src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java
         package com.apocalipse.zombieapoc.registry;
@@ -54,7 +58,7 @@ jobs:
         }
         EOF
 
-        # 2. Reescrevendo o ApocalypseZombieEntity limpo e corrigido sem erros de colagem
+        # 2. Cria a versão limpa do ApocalypseZombieEntity
         mkdir -p src/main/java/com/apocalipse/zombieapoc/entity
         cat << 'EOF' > src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java
         package com.apocalipse.zombieapoc.entity;
