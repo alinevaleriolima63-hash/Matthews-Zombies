@@ -23,33 +23,34 @@ jobs:
       run: |
         ARQUIVO_ZIP=$(find . -name "*.zip" | head -n 1)
         if [ -n "$ARQUIVO_ZIP" ]; then
-          echo "Extraindo o arquivo: $ARQUIVO_ZIP"
+          echo "Extraindo arquivo encontrado..."
           unzip -o "$ARQUIVO_ZIP"
         fi
 
-    - name: Corrigir Codigos Automaticamente
+    - name: Sanetizar e Corrigir Codigos
       run: |
         PASTA_REAL=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
         cd "$PASTA_REAL"
         
-        # 1. Corrige o arquivo do combustível mudando o pacote para a versão 1.20.1
-        FILE_FUEL="src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java"
-        if [ -f "$FILE_FUEL" ]; then
-          sed -i 's/net.minecraftforge.event.FurnaceFuelBurnTimeEvent/net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent/g' "$FILE_FUEL"
-          sed -i 's/bus = Mod.EventBusSubscriber.Bus.MOD/bus = Mod.EventBusSubscriber.Bus.FORGE/g' "$FILE_FUEL"
-        fi
-
-        # 2. Corrige o arquivo do zumbi consertando o Loot Table e a linha misturada
         FILE_ZOMBIE="src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java"
+        FILE_FUEL="src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java"
+        
+        # Possibilidade 1: Limpar as misturas de texto que travaram o build
         if [ -f "$FILE_ZOMBIE" ]; then
-          # Ajusta o método do Loot Table exigido pela 1.20.1
-          sed -i 's/public ResourceLocation getLootTable()/protected ResourceLocation getLootTableLocation()/g' "$FILE_ZOMBIE"
-          
-          # Remove completamente a linha misturada que quebrava o build
           sed -i '/if (alvo  {/d' "$FILE_ZOMBIE"
           sed -i '/case MUTANTE ->/d' "$FILE_ZOMBIE"
           sed -i '/ditionalSaveData/d' "$FILE_ZOMBIE"
           sed -i '/rnTime(/d' "$FILE_ZOMBIE"
+          sed -i '/default -> {}/d' "$FILE_ZOMBIE"
+          
+          # Possibilidade 2: Atualizar o Loot Table para o padrão da versão 1.20.1
+          sed -i 's/public ResourceLocation getLootTable()/protected ResourceLocation getLootTableLocation()/g' "$FILE_ZOMBIE"
+        fi
+        
+        # Possibilidade 3: Corrigir pastas do evento de combustível que mudaram na 1.20.1
+        if [ -f "$FILE_FUEL" ]; then
+          sed -i 's/net.minecraftforge.event.FurnaceFuelBurnTimeEvent/net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent/g' "$FILE_FUEL"
+          sed -i 's/bus = Mod.EventBusSubscriber.Bus.MOD/bus = Mod.EventBusSubscriber.Bus.FORGE/g' "$FILE_FUEL"
         fi
 
     - name: Compilar Mod Real
