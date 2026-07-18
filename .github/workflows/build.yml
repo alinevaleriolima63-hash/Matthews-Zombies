@@ -27,19 +27,17 @@ jobs:
           unzip -o "$ARQUIVO_ZIP"
         fi
 
-    - name: Corrigir Codigos Automaticamente
+    - name: Forçar Injeção de Códigos Corrigidos
       run: |
         PASTA_REAL=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
         cd "$PASTA_REAL"
         
-        # Deleta as versões corrompidas antigas para evitar que o lixo se misture
-        rm -f src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java
-        rm -f src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java
-        
-        # 1. Cria a versão limpa do ModFuelHandler
+        # Criando pastas limpas do zero garantindo permissão total de escrita
         mkdir -p src/main/java/com/apocalipse/zombieapoc/registry
-        cat << 'EOF' > src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java
-        package com.apocalipse.zombieapoc.registry;
+        mkdir -p src/main/java/com/apocalipse/zombieapoc/entity
+        
+        # 1. Forçando a escrita do ModFuelHandler Correto
+        echo 'package com.apocalipse.zombieapoc.registry;
         import com.apocalipse.zombieapoc.ZombieApocMod;
         import net.minecraft.world.item.ItemStack;
         import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
@@ -55,13 +53,10 @@ jobs:
                     event.setBurnTime(QUEIMA);
                 }
             }
-        }
-        EOF
+        }' > src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java
 
-        # 2. Cria a versão limpa do ApocalypseZombieEntity
-        mkdir -p src/main/java/com/apocalipse/zombieapoc/entity
-        cat << 'EOF' > src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java
-        package com.apocalipse.zombieapoc.entity;
+        # 2. Forçando a escrita do ApocalypseZombieEntity Correto
+        echo 'package com.apocalipse.zombieapoc.entity;
         import net.minecraft.nbt.CompoundTag;
         import net.minecraft.network.syncher.EntityDataAccessor;
         import net.minecraft.network.syncher.EntityDataSerializers;
@@ -137,7 +132,7 @@ jobs:
             @Override
             public void readAdditionalSaveData(CompoundTag tag) { super.readAdditionalSaveData(tag); if (tag.contains("ZombieApocVariant")) setVariant(ZombieVariant.byId(tag.getInt("ZombieApocVariant"))); }
         }
-        EOF
+        ' > src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java
 
     - name: Compilar Mod Real
       run: |
