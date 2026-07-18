@@ -8,32 +8,33 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v4
-      with:
-        gradle-version: 8.5
-
-    - name: Extrair ZIP e Compilar
+    - name: Listar Arquivos do Repositorio
       run: |
-        if [ -f "zombieapoc-completo.zip" ]; then
-          echo "Extraindo o mod do arquivo ZIP..."
-          unzip zombieapoc-completo.zip
+        echo "=== LISTA DE ARQUIVOS NO REPOSITÓRIO ==="
+        ls -la
+        echo "========================================="
+
+    - name: Extrair e Compilar
+      run: |
+        ARQUIVO_ZIP=$(find . -name "*.zip" | head -n 1)
+        if [ -n "$ARQUIVO_ZIP" ]; then
+          echo "Extraindo o arquivo encontrado: $ARQUIVO_ZIP"
+          unzip "$ARQUIVO_ZIP"
+        else
+          echo "Nenhum arquivo .zip foi encontrado no repositório!"
         fi
         
         PASTA_REAL=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
-        echo "Projeto localizado na pasta: $PASTA_REAL"
-        cd "$PASTA_REAL"
-        gradle build
+        if [ -n "$PASTA_REAL" ]; then
+          cd "$PASTA_REAL"
+          gradle build
+        else
+          echo "ERRO: O arquivo build.gradle nao existe mesmo após tentar extrair!"
+          exit 1
+        fi
 
     - name: Upload JAR
       uses: actions/upload-artifact@v4
       with:
         name: mod-jar
-        path: |
-          **/build/libs/*.jar
+        path: "**/build/libs/*.jar"
