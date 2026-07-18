@@ -21,13 +21,9 @@ jobs:
 
     - name: Build with Gradle
       run: |
-        if [ -d "zombieapoc" ]; then
-          cd zombieapoc
-        elif [ -d "ZombieApoc" ]; then
-          cd ZombieApoc
-        elif [ -d "zombieapoc-completo" ]; then
-          cd zombieapoc-completo
-        fi
+        PASTA_DO_MOD=$(dirname $(find . -name "build.gradle" | head -n 1))
+        echo "Pasta encontrada: $PASTA_DO_MOD"
+        cd "$PASTA_DO_MOD"
         gradle build
 
     - name: Upload JAR
@@ -35,7 +31,4 @@ jobs:
       with:
         name: mod-jar
         path: |
-          zombieapoc/build/libs/*.jar
-          ZombieApoc/build/libs/*.jar
-          zombieapoc-completo/build/libs/*.jar
-          build/libs/*.jar
+          **/build/libs/*.jar
