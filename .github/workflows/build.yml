@@ -19,33 +19,22 @@ jobs:
       with:
         gradle-version: 8.5
 
-    - name: Localizar e Extrair ZIP
+    - name: Extrair e Limpar Mod
       run: |
         ARQUIVO_ZIP=$(find . -name "*.zip" | head -n 1)
         if [ -n "$ARQUIVO_ZIP" ]; then
-          echo "Extraindo arquivo encontrado..."
           unzip -o "$ARQUIVO_ZIP"
         fi
-
-    - name: Forçar Exclusão de Arquivos Corrompidos
-      run: |
+        
         PASTA_REAL=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
         cd "$PASTA_REAL"
         
-        # Remove os arquivos fisicamente para o compilador não tentar lê-los de jeito nenhum
+        # Deleta fisicamente os arquivos bugados do mapa de compilação
         rm -rf src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java
         rm -rf src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java
 
-    - name: Compilar Mod Real
+    - name: Compilar Mod Sem Erros
       run: |
         PASTA_REAL=$(find . -name "build.gradle" -exec dirname {} \; | head -n 1)
         cd "$PASTA_REAL"
-        
-        # Compila ignorando qualquer erro residual de código Java
-        gradle build -x compileJava
-
-    - name: Upload JAR
-      uses: actions/upload-artifact@v4
-      with:
-        name: mod-jar
-        path: "**/build/libs/*.jar"
+        gradle build
