@@ -35,19 +35,15 @@ jobs:
         FILE_ZOMBIE="src/main/java/com/apocalipse/zombieapoc/entity/ApocalypseZombieEntity.java"
         FILE_FUEL="src/main/java/com/apocalipse/zombieapoc/registry/ModFuelHandler.java"
         
-        # Possibilidade 1: Limpar as misturas de texto que travaram o build
         if [ -f "$FILE_ZOMBIE" ]; then
           sed -i '/if (alvo  {/d' "$FILE_ZOMBIE"
           sed -i '/case MUTANTE ->/d' "$FILE_ZOMBIE"
           sed -i '/ditionalSaveData/d' "$FILE_ZOMBIE"
           sed -i '/rnTime(/d' "$FILE_ZOMBIE"
           sed -i '/default -> {}/d' "$FILE_ZOMBIE"
-          
-          # Possibilidade 2: Atualizar o Loot Table para o padrão da versão 1.20.1
           sed -i 's/public ResourceLocation getLootTable()/protected ResourceLocation getLootTableLocation()/g' "$FILE_ZOMBIE"
         fi
         
-        # Possibilidade 3: Corrigir pastas do evento de combustível que mudaram na 1.20.1
         if [ -f "$FILE_FUEL" ]; then
           sed -i 's/net.minecraftforge.event.FurnaceFuelBurnTimeEvent/net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent/g' "$FILE_FUEL"
           sed -i 's/bus = Mod.EventBusSubscriber.Bus.MOD/bus = Mod.EventBusSubscriber.Bus.FORGE/g' "$FILE_FUEL"
